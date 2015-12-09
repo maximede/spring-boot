@@ -22,11 +22,13 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.ManagementServerProperties.Security;
 import org.springframework.boot.actuate.condition.ConditionalOnEnabledEndpoint;
+import org.springframework.boot.actuate.endpoint.ClearCacheEndpoint;
 import org.springframework.boot.actuate.endpoint.Endpoint;
 import org.springframework.boot.actuate.endpoint.EnvironmentEndpoint;
 import org.springframework.boot.actuate.endpoint.HealthEndpoint;
 import org.springframework.boot.actuate.endpoint.MetricsEndpoint;
 import org.springframework.boot.actuate.endpoint.ShutdownEndpoint;
+import org.springframework.boot.actuate.endpoint.mvc.ClearCacheMVCEndpoint;
 import org.springframework.boot.actuate.endpoint.mvc.EndpointHandlerMapping;
 import org.springframework.boot.actuate.endpoint.mvc.EndpointHandlerMappingCustomizer;
 import org.springframework.boot.actuate.endpoint.mvc.EnvironmentMvcEndpoint;
@@ -122,6 +124,13 @@ public class EndpointWebMvcManagementContextConfiguration {
 	@ConditionalOnMissingBean
 	public MvcEndpoints mvcEndpoints() {
 		return new MvcEndpoints();
+	}
+
+	@Bean
+	@ConditionalOnBean(ClearCacheEndpoint.class)
+	@ConditionalOnEnabledEndpoint("clear_cache")
+	public ClearCacheMVCEndpoint clearCacheMVCEndpoint(ClearCacheEndpoint delegate) {
+		return new ClearCacheMVCEndpoint(delegate);
 	}
 
 	@Bean

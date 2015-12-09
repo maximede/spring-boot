@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.endpoint.AutoConfigurationReportEndpoint;
 import org.springframework.boot.actuate.endpoint.BeansEndpoint;
+import org.springframework.boot.actuate.endpoint.ClearCacheEndpoint;
 import org.springframework.boot.actuate.endpoint.ConfigurationPropertiesReportEndpoint;
 import org.springframework.boot.actuate.endpoint.DumpEndpoint;
 import org.springframework.boot.actuate.endpoint.Endpoint;
@@ -62,6 +63,7 @@ import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.bind.PropertiesConfigurationFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
@@ -91,6 +93,9 @@ public class EndpointAutoConfiguration {
 	private InfoPropertiesConfiguration properties;
 
 	@Autowired(required = false)
+	private Map<String, CacheManager> cacheManagers;
+
+	@Autowired(required = false)
 	private HealthAggregator healthAggregator = new OrderedHealthAggregator();
 
 	@Autowired(required = false)
@@ -106,6 +111,14 @@ public class EndpointAutoConfiguration {
 	@ConditionalOnMissingBean
 	public EnvironmentEndpoint environmentEndpoint() {
 		return new EnvironmentEndpoint();
+	}
+
+	@Bean
+	@ConditionalOnClass(CacheManager.class)
+	@ConditionalOnBean(CacheManager.class)
+	@ConditionalOnMissingBean
+	public ClearCacheEndpoint clearCacheEndpoint() {
+		return new ClearCacheEndpoint(this.cacheManagers);
 	}
 
 	@Bean
